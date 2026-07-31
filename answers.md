@@ -2,7 +2,7 @@
 
 ---  
 
-## Part 1  
+## PART 1  
 
 ### 1.) Authentication vs. Authorization  
 
@@ -50,4 +50,51 @@ A digital certificate helps a client establish a secure connection to an API ser
 
 Answer:  
 
-The API should normally use asynchronous processing instead of keeping the HTTP request open because the report can take several minutes to finish. If generating the report does take that long it could cause a timeout if not using asynchronous. A simple design could be to make a database record for for the request job. The record representing the requested job would have a job ID. The API can return with a `202 Accepted` status code and the job ID. The job would then be put into the message queue. The background worker would take the job from the queue and start working on it to generate the large report. The client could have a user ID of some sort that gives it access to check on its job's status using a GET request and the job ID. The succeful status code for retrieving the job's current status would be `200 OK` with the current job status
+The API should normally use asynchronous processing instead of keeping the HTTP request open because the report can take several minutes to finish. If generating the report does take that long it could cause a timeout if not using asynchronous. A simple design could be to make a database record for for the request job. The record representing the requested job would have a job ID. The API can return with a `202 Accepted` status code and the job ID. The job would then be put into the message queue. The background worker would take the job from the queue and start working on it to generate the large report. The client could have a user ID of some sort that gives it access to check on its job's status using a GET request and the job ID. The succeful status code for retrieving the job's current status would be `200 OK` with the current job status.  
+
+---  
+## PART 2  
+
+### 1.) Authentication and Authorization  
+
+#### For each request below, state whether it should be allowed or rejected. If it is rejected, provide the appropiate HTTP status code.
+
+| Request | Decision | Status Code |  
+| --- | --- | --- |   
+| a request contains no access token | rejected | `401 Unauthorized` |  
+| A request contains an expired JWT | rejected | `401 Unauthorized` |  
+| a student requests one of their own tasks | allowed | `200 OK` |  
+| A student requests another student's task | rejected | `403 Forbidden` |  
+| An instructor requests a task belonging to any student | allowed | `200 OK` |  
+
+#### Briefly explain where authentication ends and authorization begins when processing these requests.
+
+Authentication takes place first by checking the JWT to see if the user is logged in and if they are valid. It verifies their identity in the university's system. Authorization begins after that by checking the user's role to determine whether they are a student or instructor. It then checks whether that role can perform what they are requesting. So if the user is a student it can only access their own resources so trying to request others would be rejected. If they are an instructor they can access all tasks so those requests would be allowed. 
+
+
+### 2.) OAuth, JWT and PKI Design  
+
+#### Describe how the API should use OAuth, JWTs, and PKI when hadnling a request. Your design should identify: who issues the access token, how the client sends the token to teh API, what the API must validate before trusting the JWT, how the HTTPS and the server's certificate protect the connection, and why the API must not trust a role supplied in the request body.  
+
+Answer:  
+
+the univeristy's API should use OAuth to give the access token after a user logs in. The client can then use the token in requests in the `Authorization` header as a Bearer token. The API needs to be sure to validate the JWT, the expiration, the user's ID and their role. HTTPS and the rver's digital certificate protect the connection by making teh token not easily seen when traveling between client and server and then by helping the client verify that it is connecting to the intended API server. THe API must not trust a role supplied in the request body, it should only come from the JWT. This is because a student could simply put that they are an instructor in the request body to perform requests they are not authorized to do, like viewing others tasks.
+
+### 3.) Database and Asynchronous Report Processing  
+
+#### Design the report-generation portion of the API. Provide: a method URI for requesting a new report, the database record created for the report job, the message placed on the queue, the immediate HTTP status code and response body, a method and URI for checking the report's status, and the changes made by the background worker when processing succeeds or fails. Your design must not keep the original HTTP request open while the report is generated.  
+
+Answer:  
+
+The design should use a POST route for requesting the report that could look something like POST /reports. Then the database record created for the job would look like:  
+
+```json  
+{ 
+    "id": "report-17", 
+    "studentId": "djs001", 
+    "status": "pending", 
+    "downloadUrl": null 
+}  
+```  
+
+The API would then ssend a message to the queue with the job ID and the student ID. The API would immediately respond with a `202 Accepted` status code with the id and status. The client could then check the reports status with GET /reports/:id. A successful request would return a `200 OK` with the job information such as id, studentId, status, and downloadUrl. The background worker would take the job from the queue and begin working on making the report requested. If the report is comepleted, its status will get changed to completed. Then it will save the url for download. If it failed it would change the status to failed so the client would be able to see that it was tried and failed. This would prevent it from always saying pending and the student not knowing what was going on.
