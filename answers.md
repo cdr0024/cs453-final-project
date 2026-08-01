@@ -97,4 +97,21 @@ The design should use a POST route for requesting the report that could look som
 }  
 ```  
 
-The API would then ssend a message to the queue with the job ID and the student ID. The API would immediately respond with a `202 Accepted` status code with the id and status. The client could then check the reports status with GET /reports/:id. A successful request would return a `200 OK` with the job information such as id, studentId, status, and downloadUrl. The background worker would take the job from the queue and begin working on making the report requested. If the report is comepleted, its status will get changed to completed. Then it will save the url for download. If it failed it would change the status to failed so the client would be able to see that it was tried and failed. This would prevent it from always saying pending and the student not knowing what was going on.
+The API would then send a message to the queue with the job ID and the student ID. The API would immediately respond with a `202 Accepted` status code with the id and status. The client could then check the reports status with GET /reports/:id. A successful request would return a `200 OK` with the job information such as id, studentId, status, and downloadUrl. The background worker would take the job from the queue and begin working on making the report requested. If the report is comepleted, its status will get changed to completed. Then it will save the url for download. If it failed it would change the status to failed so the client would be able to see that it was tried and failed. This would prevent it from always saying pending and the student not knowing what was going on.  
+
+---  
+
+## PART 3  
+
+### 4.) Error Classification  
+
+Identify whether each situation should return `401 Unauthorized ` or `403 Forbidden`  
+
+| Situation | Status Code |  
+| --- | --- |
+| No access token was provided | `401 Unauthorized` |
+| The JWT has expired | `401 Unauthorized` |
+| The JWT signature is invalid | `401 Unauthorized` |
+| a validly authenticated student attempts an instructor-only operation | `403 Forbidden` |   
+
+---

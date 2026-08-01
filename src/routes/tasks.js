@@ -17,7 +17,8 @@ tasksRouter.get(
     "/",
     // TODO(PART 3): Replace part3NotImplemented with the required
     // authentication and role-authorization middleware.
-    part3NotImplemented,
+    authenticateToken,
+    requireRole("student", "instructor"),
     (req, res) => {
       res.json({
         userId: req.user.sub,
@@ -41,7 +42,8 @@ tasksRouter.delete(
     "/:id",
     // TODO(PART 3): Replace part3NotImplemented with authentication
     // and instructor-only authorization middleware.
-    part3NotImplemented,
+    authenticateToken,
+    requireRole("instructor"),
     async (req, res, next) => {
       try {
         const result = await db.run(
