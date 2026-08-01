@@ -114,4 +114,21 @@ Identify whether each situation should return `401 Unauthorized ` or `403 Forbid
 | The JWT signature is invalid | `401 Unauthorized` |
 | a validly authenticated student attempts an instructor-only operation | `403 Forbidden` |   
 
----
+---  
+
+## PART 4  
+
+### Database and Asynchronous Behavior  
+
+Briefly answer:  
+1.) Why should the task ID be supplied as a query parameter instead of being inserted directly into the SQL string?  
+
+Answer:  
+
+The task ID should be supplied as a query parameter instead of directly inserted in the SQL string because it keeps the query safer by stopping SQL injection
+
+2.) Why must the route use await when calling db.query()?  
+
+Answer:  
+
+The route must use await when calling db.query() because the queries run asynchronously, so the await makes the code wait for the query to return before continuing. 
