@@ -131,4 +131,24 @@ The task ID should be supplied as a query parameter instead of directly inserted
 
 Answer:  
 
-The route must use await when calling db.query() because the queries run asynchronously, so the await makes the code wait for the query to return before continuing. 
+The route must use await when calling db.query() because the queries run asynchronously, so the await makes the code wait for the query to return before continuing.  
+
+---  
+
+## PART 5  
+
+### Queue behavior  
+
+Briefly answer:  
+
+1.) Why the API returns 202 accepted instead of 200 OK or 201 Created.  
+
+Answer:  
+
+The API returns `202 Accepted` instead of `200 OK` or `201 Created` since the report is not generated yet. This lets the user know that the request went through but the report is still being processed since it can take a few minutes to generate the report.
+
+2.) One advantage of generating the report in a background worker instead of inside the route handler.  
+
+Answer:  
+
+One advantage of generating the rreport in a background worker instead of inside the route handler is letting the API be able to respond to the client quickly. The API can go ahead and respond that the request was accepted while passing of the generation of the report. Otherwise, the user would have to wait the serveral minutes it takes to generate the report before getting the response. It taking so long to respons could make the user question whether the request even went through. This also helps void timeouts.
