@@ -151,4 +151,37 @@ The API returns `202 Accepted` instead of `200 OK` or `201 Created` since the re
 
 Answer:  
 
-One advantage of generating the rreport in a background worker instead of inside the route handler is letting the API be able to respond to the client quickly. The API can go ahead and respond that the request was accepted while passing of the generation of the report. Otherwise, the user would have to wait the serveral minutes it takes to generate the report before getting the response. It taking so long to respons could make the user question whether the request even went through. This also helps void timeouts.
+One advantage of generating the rreport in a background worker instead of inside the route handler is letting the API be able to respond to the client quickly. The API can go ahead and respond that the request was accepted while passing of the generation of the report. Otherwise, the user would have to wait the serveral minutes it takes to generate the report before getting the response. It taking so long to respons could make the user question whether the request even went through. This also helps void timeouts.  
+
+---  
+
+## PART 7  
+
+---  
+
+### 1.) Following a Request Through the System  
+
+Choose one protected API operation and trace it from the client's request to the server's response. Explain how at least four of the following participate in processing the request: HTTP, express routing, middleware, authentication, authroization, database access, error handling, and OpenAPI documentation. Identify one place where the request could fail and explain how the API should respond.  
+
+Answer:  
+
+One protected API operation is DELETE/tasks/{id}. The client sends the request and then it goes through the middleware that will run before the route handler. The authentication middleware checks that the JWT is valid. If authentication goes through succesfully, the user's role will then be checked by the authorization middleware. It will check that their role is instructor before allowing the request to continue. If the role is allowed, the request will be able to move on to the route handler which will delete the task from the database. The server will respond with a 204 response if it is deleted successfully. If any sort of unexpected error occured when deleting the task , error handling would capture the error and then return whatever error response correlates. This helps prevent the server from crashing with errors. One place the request could fail is during authentication if the JWT is missing or it is invalid. If that happened the API should respond eith a 401 status code.  
+
+
+### 2.) Synchronous vs. Asynchronous Processing  
+
+Describe one operation that should be completed directly in an HTTP request and one operation that would be better handled using a message queue and background worker. Explain: why each processing model is appropiate, what the client receives, how failures would be handled, and how a database could be used to track the operation's result or status.  
+
+Answer:  
+
+One operation that should be directly completed in an HTTP request would be to use PATCH to update a task. This operation can be done quickly without downtime so the user can get a response right away. In the case that the operation fails the API can return 404 not found or 400 bad request. The databse would then store the updated task if everything was successful. One operation that would be better handled using a message queue and background worker is generating a progress report since this request requires minutes to process and finish. The client would receive a 202 Accepted status code with the job ID that they can use to check the status on the report. If it failed, the status in the database would show that when the client checked. The database would track the job's status and the updates to it that would include pending, processing, completed and failed.  
+
+### 3.) Lessons Learned  
+
+Imagine that you must give a short "lessons learned" presentation to a development team building its first web API. Identify three practices from this course that you would recommend. At least two must relate to topics from the second half of the course, such as: database integration, password or token security, authentication and authorization, PKI and HTTPS, JWT or OAuth, message queues, and asynchronous processing. For each practice, briefly explain what problem it prevents or helps solve.  
+
+Answer:  
+
+The three practices I wold recommend is using auhtentication and authorization, using JWTs, and asynchronous processing with message queues. Using authentication and authorization helps make sure the user is who they say they are and that they only perform actions they are permitted to do. Using JWTs lets the API verify the user's identity. It also helps using the time expirations with them. It helps keep things secure and decreases chances for hackers to gain access. Using asynchronous processing with a message queue is very useful for any tasks that may reuire extra time and cannot provide a quick response. When tasks require extra time it can cause timeouts or the client can get frustrated with unresponsive API. So using this allows the API to still respond quickly while passing off the tasks to run in the background.  
+
+
