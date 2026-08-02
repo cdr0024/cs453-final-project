@@ -1,0 +1,445 @@
+openapi: 3.0.3  
+
+info:
+  title: Course task tracker API
+  version: 1.0.0
+
+
+servers:
+  - url: https://localhost:3000
+
+
+security:
+  - bearerAuth: [] 
+
+
+
+
+paths:
+
+  /tasks:
+    get:
+      summary: Get all /tasks
+      description: Students can view their task. Instructors can view all.
+      responses:
+
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+        "401":
+          description: missing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403": 
+          description: You do not have permission for this application/json
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+    post:
+      summary: Create a task
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Task"
+
+      responses:
+        
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+        "400":
+          description: Invalid task data
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Missing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+        "403":
+          description: You do not have permission to perform this action 
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+
+  /tasks/{id}:
+
+    get:
+      summary: Get a task by invalid
+      description: Students can view their own task. Instructors can view any.
+      parameters:
+        - name: id 
+          in: path
+          required: true
+          description: Task id 
+          schema:
+            type: string
+
+      responses:
+       
+        "200":
+          description: Task found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+        "401":
+          description: Missing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403":
+          description: You do not have permision to perform this action 
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+        "404":
+          description: Task not found 
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+    put:
+      summary: replace a task
+
+      parameters:
+        - name: id 
+          in: path
+          required: true
+          description: task id 
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Task"
+
+
+      responses:
+
+        "200":
+          description: Task updated
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+        "400":
+          description: invalid task data
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: missing or incalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403":
+          description: User does not have permission
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404": 
+          description: task not found
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+    patch:
+      summary: update a task
+
+      parameters: 
+        - name: id 
+          in: path
+          required: true
+          description: task id 
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTask"
+
+
+      responses:
+        "200":
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+        "400":
+          description: Invalid task data
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: MIssing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403":
+          description: User does not have permision
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Task not found
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+    delete:
+      summary: delete a task
+      description: Instructor only operation
+
+      parameters:
+        - name: id 
+          in: path
+          required: true
+          description: task id 
+          schema:
+            type: string
+
+      responses:
+
+        "204":
+          description: task deleted successfully
+
+        "401":
+          description: missing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403":
+          description: Only instructors can delete tasks
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: task not found
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /reports:
+
+    post:
+      summary: create a progress report 
+
+      responses:
+
+        "202":
+          description: report request accepted
+          content:
+            application/json:
+               schema:
+                 type: object
+                 properties:
+                    jobId:
+                      type: string
+                      example: report-17
+
+                    status:
+                      type: string
+                      example: pending
+
+        "401":
+          description: missing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403":
+          description: You do not have permission to perform this action
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /reports/{id}:
+
+    get:
+      summary: Get report status
+
+      parameters:
+        - name: id 
+          in: path
+          required: true
+          description: report id 
+          schema:
+            type: string
+
+      responses:
+
+        "200":
+          description: report status 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: 
+                    type: string 
+
+                  studentId: 
+                    type: string 
+
+                  status: 
+                    type: string 
+
+                  downloadUrl:
+                    type: string
+                    nullable: true
+
+        "401": 
+          description: Missing or invalid JWT token
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "403":
+          description: User does not have permision 
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: report not found 
+          content: 
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http 
+      scheme: bearer 
+      bearerFormat: JWT 
+
+  schemas:
+    
+    Task: 
+
+      type: object 
+      required:
+        - id 
+        - title
+        - course 
+        - studentId 
+        - completed 
+
+      properties:
+        id: 
+          type: string 
+          example: "42"
+
+        title:
+          type: string 
+          example: watch week 6 lecture
+
+        course:
+          type: string 
+          example: CS453 
+
+        studentId: 
+          type: string 
+          example: djs001
+
+        completed:
+          type: boolean 
+          example: false
+
+    UpdateTask:
+      type: object 
+
+      properties:
+        title:
+          type: string
+          example: Finish project
+
+        completed:
+          type: boolean 
+          example: true
+
+
+    Error:
+
+      type: object 
+
+      properties:
+        error: 
+          type: string 
+          example: Unauthorized
