@@ -30,7 +30,7 @@ tasksRouter.get(
 tasksRouter.get('/:id',
     // TODO(PART 4): Add the required authentication and authorization middleware.
     authenticateToken,
-    requiredRole("student", "instructor"),
+    requireRole("student", "instructor"),
     async (req, res, next) => {
   // TODO(PART 4): Query req.params.id with parameterized SQL using db.query(sql, parameters).
   // req.params.id, req.user.sub, req.user.role, db.query(), and next(error) are available here.

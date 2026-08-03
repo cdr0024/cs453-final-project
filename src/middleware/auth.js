@@ -4,7 +4,7 @@ import { config } from '../config.js';
 // The imports above are supplied so students can use jwt and config.jwtSecret.
 export function authenticateToken(req, res, next) {
   // TODO(PART 3): Validate the Bearer JWT and set req.user before calling next().
-  const authentication = req.get('authorization');
+  const authorization = req.get('authorization');
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Authentication Required'});
 
